@@ -1,0 +1,14 @@
+{
+  "name": "evoeight",
+  "version": "1.0.0",
+  "description": "AWS Drift Detector",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Emanuele Gurini",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.4.5"
+  }
+}
