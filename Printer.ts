@@ -22,6 +22,6 @@ export class Printer {
       fs.writeFileSync(fileName, this.data.join("\n"), { encoding: "utf-8" });
     }
 
-    console.log(`Nomi degli stack salvati in ${fileName}`);
+    console.log(`Saved in ${fileName}`);
   }
 }

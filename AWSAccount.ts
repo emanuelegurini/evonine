@@ -16,10 +16,7 @@ export class AWSAccount {
    */
   private stackNamesList: Array<string>;
 
-  constructor(region: string) {
-    if (region === null) throw new Error("Regions should not be null");
-    this.region = region;
-  }
+  constructor() {}
 
   /**
    * TODO: Add method description
@@ -31,8 +28,23 @@ export class AWSAccount {
   }
 
   /**
+   *
+   */
+  public getRegion(): string {
+    return this.region;
+  }
+
+  /**
+   *
+   */
+  public setRegion(region: string): void {
+    if (region === null) throw new Error("Regions should not be null");
+    this.region = region;
+  }
+
+  /**
    * TODO: Add method description
-   * @returns
+   * @returns boolean
    */
   public getStackNamesFromStackList(): boolean {
     try {
@@ -71,7 +83,7 @@ export class AWSAccount {
         execSync(command, { encoding: "utf-8" });
       }
     } else {
-      console.log("The operation should not be executed.");
+      console.log("The operation could not be executed.");
       return false;
     }
 
