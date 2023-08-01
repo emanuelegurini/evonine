@@ -29,6 +29,15 @@ export class Menu {
         case "2":
           await this.logAllStackNames();
           break;
+        case "3":
+          await this.checkAllStacks();
+          break;
+        case "4":
+          await this.logAllDriftedStack();
+          break;
+        case "5":
+          await this.printAllDriftedStackOnTXTFile();
+          break;
         case "x":
           console.log("Exiting...");
           break;
@@ -45,10 +54,11 @@ export class Menu {
    */
   public print() {
     console.log("Menu:");
-    console.log("1. Print all stack names in TXT file");
+    console.log("1. Print all stack names in a TXT file");
     console.log("2. Log all Stack name");
-    console.log("3. Option three");
-    console.log("4. Option four");
+    console.log("3. Check all stacks");
+    console.log("4. Log all drifted stack");
+    console.log("5. Print all drifted stack in a TXT file");
     console.log("Press x to exit");
   }
 
@@ -96,5 +106,50 @@ export class Menu {
     console.log("START =============================================");
     console.log(stackNames);
     console.log("============================================= END");
+  }
+
+  /**
+   *
+   */
+  public async checkAllStacks() {
+    console.log("Start..");
+    console.log("Check if all stack are in sync..");
+
+    const awsAccount = new AWSAccount("eu-west-1");
+    awsAccount.checkAllStacks();
+  }
+
+  /**
+   *
+   */
+  public async logAllDriftedStack() {
+    console.log("Start..");
+    console.log("Check if all stack are in sync..");
+
+    const awsAccount = new AWSAccount("eu-west-1");
+    const stackNames = awsAccount.getAllDriftedStack();
+    console.log("START =============================================");
+    console.log(stackNames);
+    console.log("============================================= END");
+  }
+
+  /**
+   * TODO: Add property description
+   */
+  public async printAllDriftedStackOnTXTFile() {
+    try {
+      console.log("Start..");
+      console.log("Check for AWS Stack names..");
+
+      const awsAccount = new AWSAccount("eu-west-1");
+      await awsAccount.getStackNamesFromStackList();
+      const stackNames = await awsAccount.getAllDriftedStack();
+      console.log(stackNames);
+      const printer = new Printer(stackNames);
+      await printer.printData();
+      console.log("Stack names saved on .txt file.\nCheck in your directory.");
+    } catch (error) {
+      console.error("Errore durante l'esecuzione:", error);
+    }
   }
 }
