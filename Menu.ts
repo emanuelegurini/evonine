@@ -1,5 +1,8 @@
 const readline = require("readline");
 
+import { AWSAccount } from "./AWSAccount";
+import { Printer } from "./Printer";
+
 export class Menu {
   private rl;
 
@@ -21,10 +24,10 @@ export class Menu {
 
       switch (option) {
         case "1":
-          this.op1();
+          await this.printAllStackNamesOnTXTFile();
           break;
         case "2":
-          this.op2();
+          await this.logAllStackNames();
           break;
         case "x":
           console.log("Exiting...");
@@ -41,7 +44,12 @@ export class Menu {
    * TODO: Add property description
    */
   public print() {
-    return;
+    console.log("Menu:");
+    console.log("1. Print all stack names in TXT file");
+    console.log("2. Log all Stack name");
+    console.log("3. Option three");
+    console.log("4. Option four");
+    console.log("Press x to exit");
   }
 
   /**
@@ -58,14 +66,35 @@ export class Menu {
   /**
    * TODO: Add property description
    */
-  public op1() {
-    console.log("opt 1");
+  public async printAllStackNamesOnTXTFile() {
+    try {
+      console.log("Start..");
+      console.log("Check for AWS Stack names..");
+
+      const awsAccount = new AWSAccount("eu-west-1");
+      await awsAccount.getStackNamesFromStackList();
+      const stackNames = await awsAccount.getStackNameList();
+      console.log(stackNames);
+      const printer = new Printer(stackNames);
+      await printer.printData();
+      console.log("Stack names saved on .txt file.\nCheck in your directory.");
+    } catch (error) {
+      console.error("Errore durante l'esecuzione:", error);
+    }
   }
 
   /**
    * TODO: Add property description
    */
-  public op2() {
-    console.log("opt 2");
+  public async logAllStackNames() {
+    console.log("Start..");
+    console.log("Check for AWS Stack names..");
+
+    const awsAccount = new AWSAccount("eu-west-1");
+    await awsAccount.getStackNamesFromStackList();
+    const stackNames = await awsAccount.getStackNameList();
+    console.log("START =============================================");
+    console.log(stackNames);
+    console.log("============================================= END");
   }
 }
