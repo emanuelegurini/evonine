@@ -1,16 +1,9 @@
-import { AWSAccount } from "./AWSAccount";
-import { Printer } from "./Printer";
+import { Menu } from "./Menu";
 
-class Main {
-  constructor() {
-    console.log("Start.");
-    console.log("Check for AWS");
+// const awsAccount = new AWSAccount("eu-west-1");
+// awsAccount.getStackNamesFromStackList();
+// const stackNames = awsAccount.getStackNameList();
+// console.log(stackNames);
 
-    let awsAccount = new AWSAccount("eu-west-1");
-    const stackNames: Array<string> = awsAccount.getAllStackNames();
-    let printer = new Printer(stackNames);
-    printer.printData();
-  }
-}
-
-const main = new Main();
+const menu = new Menu();
+menu.start();

@@ -2,10 +2,14 @@ const fs = require("fs");
 
 export class Printer {
   private data: Array<string> | string;
+
   constructor(data: Array<string> | string) {
     this.data = data;
   }
 
+  /**
+   * TODO: Add property description
+   */
   public printData(): void {
     const today = new Date();
     const fileName = `stack_${today.getDate()}-${
