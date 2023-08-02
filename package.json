@@ -4,11 +4,12 @@
   "description": "AWS Drift Detector",
   "main": "main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "vitest"
   },
   "author": "Emanuele Gurini",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^20.4.5"
+    "@types/node": "^20.4.5",
+    "vitest": "^0.34.1"
   }
 }
