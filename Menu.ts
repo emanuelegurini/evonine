@@ -41,7 +41,7 @@ export class Menu {
 
       const selectedRegion = awsRegionMap[option];
       if (selectedRegion) {
-        await this.awsAccount.setRegion(selectedRegion);
+        this.awsAccount.setRegion(selectedRegion);
         console.log(
           "\x1b[42m",
           "Selected region:",
@@ -59,13 +59,13 @@ export class Menu {
         const options = this.getMenuOptions();
         const selectedOption = options[option];
         if (selectedOption) {
-          await selectedOption();
           console.log(
             "\x1b[45m",
             "Selected option:",
             menuOptions[option],
             "\x1b[0m"
           );
+          selectedOption();
         } else {
           console.log("Invalid option. Please try again.");
         }
@@ -89,16 +89,16 @@ export class Menu {
   /**
    * TODO: Add method description
    */
-  public async printAllStackNamesOnTXTFile() {
+  public printAllStackNamesOnTXTFile() {
     try {
       console.log("Start..");
       console.log("Check for AWS Stack names..");
 
-      await this.awsAccount.getStackNamesFromStackList();
-      const stackNames = await this.awsAccount.getStackNameList();
+      this.awsAccount.getStackNamesFromStackList();
+      const stackNames = this.awsAccount.getStackNameList();
       console.log(stackNames);
       const printer = new Printer(stackNames);
-      await printer.printData();
+      printer.printData();
       console.log("Stack names saved on .txt file.");
       console.log("Check in your directory.");
     } catch (error) {
@@ -114,22 +114,22 @@ export class Menu {
       "1": () => this.logAllStackNames(),
       "2": () => this.checkAllStacks(),
       "3": () => this.logAllDriftedStack(),
-      "4": () => this.printAllStackNamesOnTXTFile(),
-      "5": () => this.printAllDriftedStackOnTXTFile(),
+      "4": () => this.getAllStatusStack(),
+      "5": () => this.printAllStackNamesOnTXTFile(),
+      "6": () => this.printAllDriftedStackOnTXTFile(),
     };
   }
 
   /**
    * TODO: Add method description
    */
-  public async logAllStackNames() {
+  public logAllStackNames() {
     try {
       console.log("Start..");
       console.log("Check for AWS Stack names..");
 
-      //const awsAccount = new AWSAccount("eu-west-1");
-      await this.awsAccount.getStackNamesFromStackList();
-      const stackNames = await this.awsAccount.getStackNameList();
+      this.awsAccount.getStackNamesFromStackList();
+      const stackNames = this.awsAccount.getStackNameList();
       console.log("START =============================================");
       console.log(stackNames);
       console.log("=============================================== END");
@@ -146,7 +146,6 @@ export class Menu {
       console.log("Start..");
       console.log("Check if all stack are in sync..");
 
-      //const awsAccount = new AWSAccount("eu-west-1");
       this.awsAccount.checkAllStacks();
     } catch (error: unknown) {
       console.error("Error during the execution:", error);
@@ -161,7 +160,6 @@ export class Menu {
       console.log("Start..");
       console.log("Check if all stack are in sync..");
 
-      //const awsAccount = new AWSAccount("eu-west-1");
       const stackNames = this.awsAccount.getAllDriftedStack();
       console.log("START =============================================");
       console.log(stackNames);
@@ -174,19 +172,32 @@ export class Menu {
   /**
    * TODO: Add method description
    */
-  public async printAllDriftedStackOnTXTFile() {
+  public printAllDriftedStackOnTXTFile() {
     try {
       console.log("Start..");
       console.log("Check for AWS Stack names..");
 
-      //const awsAccount = new AWSAccount("eu-west-1");
-      await this.awsAccount.getStackNamesFromStackList();
-      const stackNames = await this.awsAccount.getAllDriftedStack();
+      this.awsAccount.getStackNamesFromStackList();
+      const stackNames = this.awsAccount.getAllDriftedStack();
       console.log(stackNames);
       const printer = new Printer(stackNames);
-      await printer.printData();
+      printer.printData();
       console.log("Stack names saved on .txt file.");
       console.log("Check in your directory.");
+    } catch (error: unknown) {
+      console.error("Error during the execution:", error);
+    }
+  }
+
+  public getAllStatusStack() {
+    try {
+      console.log("Start..");
+      console.log("Check if all stack are in sync..");
+
+      const stackNames = this.awsAccount.getAllStackWithStatus();
+      console.log("START =============================================");
+      console.log(stackNames);
+      console.log("=============================================== END");
     } catch (error: unknown) {
       console.error("Error during the execution:", error);
     }

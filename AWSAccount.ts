@@ -23,7 +23,7 @@ export class AWSAccount {
    * @returns
    */
   public fetchStackList(): string {
-    const command = `aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE ROLLBACK_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE --region eu-west-1 --query 'sort_by(StackSummaries, &StackName)[*].[StackName, StackStatus, DriftInformation.StackDriftStatus, DriftInformation.LastCheckTimestamp]' --output table`;
+    const command = `aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE ROLLBACK_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE --region ${this.region} --query 'sort_by(StackSummaries, &StackName)[*].[StackName, StackStatus, DriftInformation.StackDriftStatus, DriftInformation.LastCheckTimestamp]' --output table`;
     return execSync(command, { encoding: "utf-8" });
   }
 
@@ -53,7 +53,8 @@ export class AWSAccount {
         .trim()
         .split(/\r?\n/)
         .slice(3)
-        .map((row) => row.split(/\s+/)[1]);
+        .map((row) => row.split(/\s+/)[1])
+        .filter((item) => item !== undefined && item.trim() !== "");
       return true;
     } catch (error: unknown) {
       console.error("An error occurred while retrieving the stacks:", error);
@@ -74,14 +75,12 @@ export class AWSAccount {
    */
   public checkAllStacks(): boolean {
     if (this.getStackNamesFromStackList()) {
-      for (let i = 0; i < this.stackNamesList.length - 1; i++) {
+      for (let i = 0; i < this.stackNamesList.length; i++) {
         const stackName = this.stackNamesList[i];
-        const command = `aws cloudformation detect-stack-drift \
-        --stack-name ${stackName} \
-        --region ${this.region}`;
-
+        const command = `aws cloudformation detect-stack-drift --stack-name ${stackName} --region ${this.region}`;
+        let index = i + 1;
         console.log(
-          `[Stack ${i + 1} / ${this.stackNamesList.length}] - ${command}`
+          `[Stack ${index} / ${this.stackNamesList.length}] - ${command}`
         );
         execSync(command, { encoding: "utf-8" });
       }
@@ -93,14 +92,25 @@ export class AWSAccount {
     return true;
   }
 
-  public async getAllDriftedStack(): Promise<string> {
-    await this.checkAllStacks();
-    const command = `aws cloudformation \
-    list-stacks \
-    --stack-status-filter CREATE_COMPLETE ROLLBACK_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE \
-    --region ${this.region} \
-    --query 'sort_by(StackSummaries, &StackName)[*].[StackName, StackStatus, DriftInformation.StackDriftStatus, DriftInformation.LastCheckTimestamp]' \
-    --output table | grep DRIFTED`;
+  /**
+   *
+   */
+  public getAllDriftedStack(): string {
+    const stacks = this.getAllStackWithStatus();
+    const flag = stacks.includes("DRIFTED");
+    if (!flag) {
+      return "There are not drifted stack.";
+    }
+    const command = `aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE ROLLBACK_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE --region ${this.region} --query 'sort_by(StackSummaries, &StackName)[*].[StackName, StackStatus, DriftInformation.StackDriftStatus, DriftInformation.LastCheckTimestamp]' --output table | grep DRIFTED`;
+    return execSync(command, { encoding: "utf-8" });
+  }
+
+  /**
+   *
+   */
+  public getAllStackWithStatus(): string {
+    this.checkAllStacks();
+    const command = `aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE ROLLBACK_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE --region ${this.region} --query 'sort_by(StackSummaries, &StackName)[*].[StackName, StackStatus, DriftInformation.StackDriftStatus, DriftInformation.LastCheckTimestamp]' --output table`;
 
     return execSync(command, { encoding: "utf-8" });
   }

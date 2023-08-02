@@ -5,6 +5,7 @@ export enum AwsRegion {
   US_WEST_2 = "us-west-2",
   EU_WEST_1 = "eu-west-1",
   EU_WEST_2 = "eu-west-2",
+  EU_SOUTH_1 = "eu-south-1",
   EU_CENTRAL_1 = "eu-central-1",
   AP_SOUTHEAST_1 = "ap-southeast-1",
   AP_SOUTHEAST_2 = "ap-southeast-2",
@@ -37,12 +38,14 @@ export const awsRegionMap = {
   "16": AwsRegion.AP_EAST_1,
   "17": AwsRegion.ME_SOUTH_1,
   "18": AwsRegion.AF_SOUTH_1,
+  "19": AwsRegion.EU_SOUTH_1,
 };
 
 export const menuOptions = {
   1: "Log all Stack name",
   2: "Check all stacks",
   3: "Log all drifted stack",
-  4: "Print all stack names in a TXT file",
-  5: "Print all drifted stack in a TXT file",
+  4: "Log table with all stack status",
+  5: "Print all stack names in a TXT file",
+  6: "Print all drifted stack in a TXT file",
 };
