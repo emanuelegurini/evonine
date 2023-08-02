@@ -78,19 +78,6 @@ export class Menu {
   /**
    * TODO: Add method description
    */
-  public getMenuOptions() {
-    return {
-      "1": () => this.logAllStackNames(),
-      "2": () => this.checkAllStacks(),
-      "3": () => this.logAllDriftedStack(),
-      "4": () => this.printAllStackNamesOnTXTFile(),
-      "5": () => this.printAllDriftedStackOnTXTFile(),
-    };
-  }
-
-  /**
-   * TODO: Add method description
-   */
   public getInput(): Promise<string> {
     return new Promise((resolve) => {
       this.rl.question("Enter your option: ", (answer) => {
@@ -117,6 +104,19 @@ export class Menu {
     } catch (error) {
       console.error("Error during the execution:", error);
     }
+  }
+
+  /**
+   * TODO: Add method description
+   */
+  public getMenuOptions() {
+    return {
+      "1": () => this.logAllStackNames(),
+      "2": () => this.checkAllStacks(),
+      "3": () => this.logAllDriftedStack(),
+      "4": () => this.printAllStackNamesOnTXTFile(),
+      "5": () => this.printAllDriftedStackOnTXTFile(),
+    };
   }
 
   /**
