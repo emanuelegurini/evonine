@@ -6,7 +6,7 @@ import { menuOptions, awsRegionMap } from "./data";
 
 export class Menu {
   private rl;
-  private awsAccount;
+  private awsAccount: AWSAccount;
 
   constructor() {
     this.awsAccount = new AWSAccount();
