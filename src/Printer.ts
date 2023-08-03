@@ -11,17 +11,30 @@ export class Printer {
    * TODO: Add property description
    */
   public printData(): void {
-    const today = new Date();
-    const fileName = `stack_${today.getDate()}-${
-      today.getMonth() + 1
-    }-${today.getFullYear()}_${today.getHours()}-${today.getMinutes()}.txt`;
+    const fileName = this.getFileName();
 
     if (typeof this.data === "string") {
-      fs.writeFileSync("stack.txt", this.data, { encoding: "utf-8" });
+      fs.writeFileSync(fileName, this.data, { encoding: "utf-8" });
     } else {
       fs.writeFileSync(fileName, this.data.join("\n"), { encoding: "utf-8" });
     }
 
     console.log(`Saved in ${fileName}`);
+  }
+
+  /**
+   * Return file name using the following format
+   * <STACKNAME_DD-MM-YYYY_HH-mm.txt>
+   */
+  public getFileName(): string {
+    const today = new Date();
+
+    const dd: string = today.getDate().toString().padStart(2, "0");
+    const MM: string = (today.getMonth() + 1).toString().padStart(2, "0");
+    const YYYY: string = today.getUTCFullYear().toString();
+    const HH: string = today.getHours().toString().padStart(2, "0");
+    const mm: string = today.getMinutes().toString().padStart(2, "0");
+
+    return `stack_${dd}-${MM}-${YYYY}_${HH}-${mm}.txt`;
   }
 }
