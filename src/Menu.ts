@@ -17,6 +17,20 @@ export class Menu {
   }
 
   /**
+   * TODO: Add method description
+   */
+  public getMenuOptions() {
+    return {
+      "1": () => this.logAllStackNames(),
+      "2": () => this.checkAllStacks(),
+      "3": () => this.logAllDriftedStack(),
+      "4": () => this.getAllStatusStack(),
+      "5": () => this.printAllStackNamesOnTXTFile(),
+      "6": () => this.printAllDriftedStackOnTXTFile(),
+    };
+  }
+
+  /**
    * TODO: Add property description
    */
   public print(header: string, options: { [key: number]: string }) {
@@ -124,26 +138,11 @@ export class Menu {
   /**
    * TODO: Add method description
    */
-  public getMenuOptions() {
-    return {
-      "1": () => this.logAllStackNames(),
-      "2": () => this.checkAllStacks(),
-      "3": () => this.logAllDriftedStack(),
-      "4": () => this.getAllStatusStack(),
-      "5": () => this.printAllStackNamesOnTXTFile(),
-      "6": () => this.printAllDriftedStackOnTXTFile(),
-    };
-  }
-
-  /**
-   * TODO: Add method description
-   */
   public logAllStackNames() {
     try {
       console.log("Start..");
       console.log("Check for AWS Stack names..");
 
-      this.awsAccount.getStackNamesFromStackList();
       const stackNames = this.awsAccount.getStackNameList();
       console.log("START =============================================");
       console.log(stackNames);
