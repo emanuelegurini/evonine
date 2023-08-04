@@ -1,4 +1,5 @@
 const { execSync } = require("child_process");
+import { AWSNetworkOperator } from "./AWSNetworkOperations";
 
 export class AWSAccount {
   /**
@@ -16,15 +17,19 @@ export class AWSAccount {
    */
   private stackNamesList: Array<string>;
 
-  constructor() {}
+  /**
+   * TODO: Add property description
+   */
+  private awsNetworkOperator: AWSNetworkOperator;
 
   /**
-   * TODO: Add method description
-   * @returns
+   * TODO: Add property description
    */
-  public fetchStackList(): string {
-    const command = `aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE ROLLBACK_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE --region ${this.region} --query 'sort_by(StackSummaries, &StackName)[*].[StackName, StackStatus, DriftInformation.StackDriftStatus, DriftInformation.LastCheckTimestamp]' --output table`;
-    return execSync(command, { encoding: "utf-8" });
+  private isStacksChecked: boolean;
+
+  constructor() {
+    this.awsNetworkOperator = new AWSNetworkOperator();
+    this.isStacksChecked = false;
   }
 
   /**
@@ -48,7 +53,9 @@ export class AWSAccount {
    */
   public getStackNamesFromStackList(): boolean {
     try {
-      const stackNames: string = this.fetchStackList();
+      const stackNames: string = this.awsNetworkOperator.fetchStackList(
+        this.region
+      );
       this.stackNamesList = stackNames
         .trim()
         .split(/\r?\n/)
@@ -64,54 +71,67 @@ export class AWSAccount {
 
   /**
    * TODO: Add method description
-   * @returns
    */
   public getStackNameList(): Array<string> {
+    if (!this.stackNamesList) this.getStackNamesFromStackList();
+
     return this.stackNamesList;
   }
 
   /**
-   * TODO: Add method description
+   *
    */
   public checkAllStacks(): boolean {
-    if (this.getStackNamesFromStackList()) {
-      for (let i = 0; i < this.stackNamesList.length; i++) {
-        const stackName = this.stackNamesList[i];
-        const command = `aws cloudformation detect-stack-drift --stack-name ${stackName} --region ${this.region}`;
-        let index = i + 1;
-        console.log(
-          `[Stack ${index} / ${this.stackNamesList.length}] - ${command}`
-        );
-        execSync(command, { encoding: "utf-8" });
+    try {
+      if (this.isStacksChecked) {
+        return true;
       }
-    } else {
-      console.log("The operation could not be executed.");
-      return false;
-    }
+      if (!this.stackNamesList) {
+        this.getStackNamesFromStackList();
+      }
 
-    return true;
+      if (this.stackNamesList && this.stackNamesList.length > 0) {
+        for (let i = 0; i < this.stackNamesList.length; i++) {
+          const stackName = this.stackNamesList[i];
+          const region = this.region;
+          let index = i + 1;
+          console.log(
+            `[Stack ${index} / ${this.stackNamesList.length}] - ${stackName}`
+          );
+
+          this.awsNetworkOperator.detectStackDrift(stackName, region);
+        }
+      }
+      this.isStacksChecked = true;
+      return this.isStacksChecked;
+    } catch (error: unknown) {
+      console.error("An error occurred while checking the stacks:", error);
+      return this.isStacksChecked;
+    }
   }
 
   /**
    *
    */
   public getAllDriftedStack(): string {
-    const stacks = this.getAllStackWithStatus();
-    const flag = stacks.includes("DRIFTED");
-    if (!flag) {
-      return "There are not drifted stack.";
+    try {
+      if (!this.isStacksChecked) {
+        this.checkAllStacks();
+      }
+      return this.awsNetworkOperator.getAllDriftedStacks(this.region);
+    } catch (error: unknown) {
+      return "All stacks are in sync";
     }
-    const command = `aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE ROLLBACK_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE --region ${this.region} --query 'sort_by(StackSummaries, &StackName)[*].[StackName, StackStatus, DriftInformation.StackDriftStatus, DriftInformation.LastCheckTimestamp]' --output table | grep DRIFTED`;
-    return execSync(command, { encoding: "utf-8" });
   }
 
   /**
    *
    */
   public getAllStackWithStatus(): string {
-    this.checkAllStacks();
-    const command = `aws cloudformation list-stacks --stack-status-filter CREATE_COMPLETE ROLLBACK_COMPLETE UPDATE_COMPLETE UPDATE_ROLLBACK_COMPLETE --region ${this.region} --query 'sort_by(StackSummaries, &StackName)[*].[StackName, StackStatus, DriftInformation.StackDriftStatus, DriftInformation.LastCheckTimestamp]' --output table`;
+    if (!this.isStacksChecked) {
+      this.checkAllStacks();
+    }
 
-    return execSync(command, { encoding: "utf-8" });
+    return this.awsNetworkOperator.getAllStackWithStatus(this.region);
   }
 }
