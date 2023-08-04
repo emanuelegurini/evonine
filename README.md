@@ -44,11 +44,10 @@ To run EVONINE you need two things:
 
 ### Step 1:
 
-- Copy the temporary credentials from you AWS Account.
+- Copy the temporary credentials from you AWS Account;
+- Paste them into your terminal.
 
 ![Step 1](https://github.com/EmanueleGurini/evonine/blob/main/images/step_1.png)
-
-- Paste them into your terminal.
 
 ![Step 2](https://github.com/EmanueleGurini/evonine/blob/main/images/step_2.png)
 
