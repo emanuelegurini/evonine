@@ -12,6 +12,7 @@
 .DS_Store
 *.pem
 /*.js
+*/*.js
 /*.txt
 
 # Editor directories and files
