@@ -181,8 +181,11 @@ export class Menu {
     try {
       console.log("Start..");
       console.log("Check if all stack are in sync..");
-
-      this.awsAccount.checkAllStacks();
+      if (this.awsAccount.checkAllStacks()) {
+        console.log("Stack are checked.");
+      } else {
+        this.awsAccount.checkAllStacks();
+      }
     } catch (error: unknown) {
       console.error("Error during the execution:", error);
     }

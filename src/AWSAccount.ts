@@ -83,6 +83,9 @@ export class AWSAccount {
    */
   public checkAllStacks(): boolean {
     try {
+      if (this.isStacksChecked) {
+        return true;
+      }
       if (!this.stackNamesList) {
         this.getStackNamesFromStackList();
       }
@@ -100,10 +103,10 @@ export class AWSAccount {
         }
       }
       this.isStacksChecked = true;
-      return true;
+      return this.isStacksChecked;
     } catch (error: unknown) {
       console.error("An error occurred while checking the stacks:", error);
-      return false;
+      return this.isStacksChecked;
     }
   }
 
@@ -112,6 +115,9 @@ export class AWSAccount {
    */
   public getAllDriftedStack(): string {
     try {
+      if (!this.isStacksChecked) {
+        this.checkAllStacks();
+      }
       return this.awsNetworkOperator.getAllDriftedStacks(this.region);
     } catch (error: unknown) {
       return "All stacks are in sync";
