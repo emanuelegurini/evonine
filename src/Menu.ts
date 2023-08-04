@@ -35,6 +35,21 @@ export class Menu {
   public async start() {
     let option: string;
 
+    console.log(`
+    ███████████████████████████████████████████████████████████████
+
+      ███████╗██╗   ██╗ ██████╗ ███╗   ██╗██╗███╗   ██╗███████╗
+      ██╔════╝██║   ██║██╔═══██╗████╗  ██║██║████╗  ██║██╔════╝
+      █████╗  ██║   ██║██║   ██║██╔██╗ ██║██║██╔██╗ ██║█████╗  
+      ██╔══╝  ╚██╗ ██╔╝██║   ██║██║╚██╗██║██║██║╚██╗██║██╔══╝  
+      ███████╗ ╚████╔╝ ╚██████╔╝██║ ╚████║██║██║ ╚████║███████╗
+      ╚══════╝  ╚═══╝   ╚═════╝ ╚═╝  ╚═══╝╚═╝╚═╝  ╚═══╝╚══════╝
+                                                               
+                       AWS Drift Detector
+
+    ███████████████████████████████████████████████████████████████
+      `);
+
     do {
       this.print("Select your region:", awsRegionMap);
       option = await this.getInput();
@@ -48,28 +63,28 @@ export class Menu {
           this.awsAccount.getRegion(),
           "\x1b[0m"
         );
+
+        do {
+          this.print("Menu", menuOptions);
+          option = await this.getInput();
+
+          const options = this.getMenuOptions();
+          const selectedOption = options[option];
+          if (selectedOption) {
+            console.log(
+              "\x1b[45m",
+              "Selected option:",
+              menuOptions[option],
+              "\x1b[0m"
+            );
+            selectedOption();
+          } else {
+            console.log("Invalid option. Please try again.");
+          }
+        } while (option !== "x");
       } else {
         console.log("Invalid option. Please try again.");
       }
-
-      do {
-        this.print("Menu", menuOptions);
-        option = await this.getInput();
-
-        const options = this.getMenuOptions();
-        const selectedOption = options[option];
-        if (selectedOption) {
-          console.log(
-            "\x1b[45m",
-            "Selected option:",
-            menuOptions[option],
-            "\x1b[0m"
-          );
-          selectedOption();
-        } else {
-          console.log("Invalid option. Please try again.");
-        }
-      } while (option !== "x");
     } while (option !== "x");
 
     this.rl.close();
