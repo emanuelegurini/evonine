@@ -62,7 +62,7 @@ tsc main.ts
 node main
 ```
 
-![Step 3](https://github.com/EmanueleGurini/evonine/blob/main/images/step_3.png)
+![Step 3](https://github.com/EmanueleGurini/evonine/blob/main/images/step_3.jpeg)
 
 ## License
 
