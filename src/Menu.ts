@@ -46,9 +46,7 @@ export class Menu {
   /**
    * TODO: Add method description
    */
-  public async start() {
-    let option: string;
-
+  private printHeader() {
     console.log(`
     ███████████████████████████████████████████████████████████████
 
@@ -63,42 +61,66 @@ export class Menu {
 
     ███████████████████████████████████████████████████████████████
       `);
+  }
 
+  /**
+   * TODO: Add method description
+   */
+  private async selectRegion(): Promise<void> {
+    this.print("Select your region:", awsRegionMap);
+    const option = await this.getInput();
+
+    const selectedRegion = awsRegionMap[option];
+    if (selectedRegion) {
+      this.awsAccount.setRegion(selectedRegion);
+      console.log(
+        "\x1b[42m",
+        "Selected region:",
+        this.awsAccount.getRegion(),
+        "\x1b[0m"
+      );
+    } else {
+      console.log("Invalid region. Please try again.");
+    }
+  }
+
+  /**
+   * TODO: Add method description
+   */
+  private async executeOption(option: string): Promise<void> {
+    const options = this.getMenuOptions();
+    const selectedOption = options[option];
+    if (selectedOption) {
+      console.log(
+        "\x1b[45m",
+        "Selected option:",
+        menuOptions[option],
+        "\x1b[0m"
+      );
+      await selectedOption();
+    } else {
+      console.log("Invalid option. Please try again.");
+    }
+  }
+
+  /**
+   * TODO: Add method description
+   */
+  public async start() {
+    this.printHeader();
+
+    let option: string;
     do {
-      this.print("Select your region:", awsRegionMap);
-      option = await this.getInput();
+      await this.selectRegion();
 
-      const selectedRegion = awsRegionMap[option];
-      if (selectedRegion) {
-        this.awsAccount.setRegion(selectedRegion);
-        console.log(
-          "\x1b[42m",
-          "Selected region:",
-          this.awsAccount.getRegion(),
-          "\x1b[0m"
-        );
+      do {
+        this.print("Menu", menuOptions);
+        option = await this.getInput();
 
-        do {
-          this.print("Menu", menuOptions);
-          option = await this.getInput();
-
-          const options = this.getMenuOptions();
-          const selectedOption = options[option];
-          if (selectedOption) {
-            console.log(
-              "\x1b[45m",
-              "Selected option:",
-              menuOptions[option],
-              "\x1b[0m"
-            );
-            selectedOption();
-          } else {
-            console.log("Invalid option. Please try again.");
-          }
-        } while (option !== "x");
-      } else {
-        console.log("Invalid option. Please try again.");
-      }
+        if (option !== "x") {
+          await this.executeOption(option);
+        }
+      } while (option !== "x");
     } while (option !== "x");
 
     this.rl.close();
