@@ -1,15 +1,14 @@
+import { IPrinter } from "./IPrinter";
+
 const fs = require("fs");
 
-export class Printer {
+export class Printer implements IPrinter {
   private data: Array<string> | string;
 
   constructor(data: Array<string> | string) {
     this.data = data;
   }
 
-  /**
-   * TODO: Add property description
-   */
   public printData(): void {
     const fileName = this.getFileName();
 
@@ -22,10 +21,6 @@ export class Printer {
     console.log(`Saved in ${fileName}`);
   }
 
-  /**
-   * Return file name using the following format
-   * <STACKNAME_DD-MM-YYYY_HH-mm.txt>
-   */
   public getFileName(): string {
     const today = new Date();
 
@@ -35,6 +30,7 @@ export class Printer {
     const HH: string = today.getHours().toString().padStart(2, "0");
     const mm: string = today.getMinutes().toString().padStart(2, "0");
 
+    // <STACKNAME_DD-MM-YYYY_HH-mm.txt>
     return `stack_${dd}-${MM}-${YYYY}_${HH}-${mm}.txt`;
   }
 }

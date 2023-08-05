@@ -1,62 +1,87 @@
 const { execSync } = require("child_process");
-import { AWSNetworkOperator } from "./AWSNetworkOperations";
+import { AWSNetworkOperator } from "./AWSNetworkOperator";
+import { IAWSAccount } from "./IAWSAccount";
 
-export class AWSAccount {
-  /**
-   * TODO: Add property description
-   */
-  private name: string;
+export class AWSAccount implements IAWSAccount {
+  //private _accountName: string;
 
-  /**
-   * TODO: Add property description
-   */
-  private region: string;
+  private _region: string;
 
-  /**
-   * TODO: Add property description
-   */
-  private stackNamesList: Array<string>;
+  private _stackNamesList!: Array<string>;
 
-  /**
-   * TODO: Add property description
-   */
-  private awsNetworkOperator: AWSNetworkOperator;
+  private _awsNetworkOperator: AWSNetworkOperator;
 
-  /**
-   * TODO: Add property description
-   */
-  private isStacksChecked: boolean;
+  _isStacksChecked: boolean;
 
   constructor() {
-    this.awsNetworkOperator = new AWSNetworkOperator();
-    this.isStacksChecked = false;
+    this._region = "";
+    this._awsNetworkOperator = new AWSNetworkOperator();
+    this._isStacksChecked = false;
   }
 
-  /**
-   *
-   */
   public getRegion(): string {
-    return this.region;
+    return this._region;
   }
 
-  /**
-   *
-   */
   public setRegion(region: string): void {
     if (region === null) throw new Error("Regions should not be null");
-    this.region = region;
+    this._region = region;
   }
 
-  /**
-   * TODO: Add method description
-   * @returns boolean
-   */
+  public checkAllStacks(): boolean {
+    try {
+      if (this._isStacksChecked) {
+        return true;
+      }
+      if (!this._stackNamesList) {
+        this.getStackNamesFromStackList();
+      }
+
+      if (this._stackNamesList && this._stackNamesList.length > 0) {
+        for (let i = 0; i < this._stackNamesList.length; i++) {
+          const stackName = this._stackNamesList[i];
+          const region = this._region;
+          let index = i + 1;
+          console.log(
+            `[Stack ${index} / ${this._stackNamesList.length}] - ${stackName}`
+          );
+
+          this._awsNetworkOperator.detectStackDrift(stackName, region);
+        }
+      }
+      this._isStacksChecked = true;
+      return this._isStacksChecked;
+    } catch (error: unknown) {
+      console.error("An error occurred while checking the stacks:", error);
+      return this._isStacksChecked;
+    }
+  }
+
+  public getAllDriftedStack(): string {
+    try {
+      if (!this._isStacksChecked) {
+        this.checkAllStacks();
+      }
+      return this._awsNetworkOperator.getAllDriftedStacks(this._region);
+    } catch (error: unknown) {
+      return "All stacks are in sync";
+    }
+  }
+
+  public getAllStackWithStatus(): string {
+    if (!this._isStacksChecked) {
+      this.checkAllStacks();
+    }
+
+    return this._awsNetworkOperator.getAllStackWithStatus(this._region);
+  }
+
   public getStackNamesFromStackList(): boolean {
     try {
-      const stackNames: string = this.awsNetworkOperator.fetchStackList(
-        this.region
+      const stackNames: string = this._awsNetworkOperator.fetchStackList(
+        this._region
       );
-      this.stackNamesList = stackNames
+      this._stackNamesList = stackNames
         .trim()
         .split(/\r?\n/)
         .slice(3)
@@ -69,69 +94,9 @@ export class AWSAccount {
     }
   }
 
-  /**
-   * TODO: Add method description
-   */
   public getStackNameList(): Array<string> {
-    if (!this.stackNamesList) this.getStackNamesFromStackList();
+    if (!this._stackNamesList) this.getStackNamesFromStackList();
 
-    return this.stackNamesList;
-  }
-
-  /**
-   *
-   */
-  public checkAllStacks(): boolean {
-    try {
-      if (this.isStacksChecked) {
-        return true;
-      }
-      if (!this.stackNamesList) {
-        this.getStackNamesFromStackList();
-      }
-
-      if (this.stackNamesList && this.stackNamesList.length > 0) {
-        for (let i = 0; i < this.stackNamesList.length; i++) {
-          const stackName = this.stackNamesList[i];
-          const region = this.region;
-          let index = i + 1;
-          console.log(
-            `[Stack ${index} / ${this.stackNamesList.length}] - ${stackName}`
-          );
-
-          this.awsNetworkOperator.detectStackDrift(stackName, region);
-        }
-      }
-      this.isStacksChecked = true;
-      return this.isStacksChecked;
-    } catch (error: unknown) {
-      console.error("An error occurred while checking the stacks:", error);
-      return this.isStacksChecked;
-    }
-  }
-
-  /**
-   *
-   */
-  public getAllDriftedStack(): string {
-    try {
-      if (!this.isStacksChecked) {
-        this.checkAllStacks();
-      }
-      return this.awsNetworkOperator.getAllDriftedStacks(this.region);
-    } catch (error: unknown) {
-      return "All stacks are in sync";
-    }
-  }
-
-  /**
-   *
-   */
-  public getAllStackWithStatus(): string {
-    if (!this.isStacksChecked) {
-      this.checkAllStacks();
-    }
-
-    return this.awsNetworkOperator.getAllStackWithStatus(this.region);
+    return this._stackNamesList;
   }
 }

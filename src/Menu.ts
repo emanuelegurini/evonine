@@ -1,24 +1,22 @@
 const readline = require("readline");
 
 import { AWSAccount } from "./AWSAccount";
+import { IMenu } from "./IMenu";
 import { Printer } from "./Printer";
 import { menuOptions, awsRegionMap } from "./data";
 
-export class Menu {
-  private rl;
-  private awsAccount: AWSAccount;
+export class Menu implements IMenu {
+  private _rl;
+  private _awsAccount: AWSAccount;
 
   constructor() {
-    this.awsAccount = new AWSAccount();
-    this.rl = readline.createInterface({
+    this._awsAccount = new AWSAccount();
+    this._rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
     });
   }
 
-  /**
-   * TODO: Add method description
-   */
   public getMenuOptions() {
     return {
       "1": () => this.logAllStackNames(),
@@ -30,10 +28,7 @@ export class Menu {
     };
   }
 
-  /**
-   * TODO: Add property description
-   */
-  public print(header: string, options: { [key: number]: string }) {
+  public print(header: string, options: { [key: number]: string }): void {
     console.log("");
     console.log(header);
     for (const key in options) {
@@ -57,38 +52,64 @@ export class Menu {
       ███████╗ ╚████╔╝ ╚██████╔╝██║ ╚████║██║██║ ╚████║███████╗
       ╚══════╝  ╚═══╝   ╚═════╝ ╚═╝  ╚═══╝╚═╝╚═╝  ╚═══╝╚══════╝
                                                                
-                       AWS Drift Detector
+                         AWS Drift Detector
 
     ███████████████████████████████████████████████████████████████
       `);
   }
 
-  /**
-   * TODO: Add method description
-   */
-  private async selectRegion(): Promise<void> {
+  private async selectRegion(): Promise<boolean> {
     this.print("Select your region:", awsRegionMap);
-    const option = await this.getInput();
+    const option: string = await this.getInput();
+
+    if (option === "x") {
+      return true; // Return true if user entered "x"
+    }
 
     const selectedRegion = awsRegionMap[option];
     if (selectedRegion) {
-      this.awsAccount.setRegion(selectedRegion);
+      this._awsAccount.setRegion(selectedRegion);
       console.log(
         "\x1b[42m",
         "Selected region:",
-        this.awsAccount.getRegion(),
+        this._awsAccount.getRegion(),
         "\x1b[0m"
       );
     } else {
       console.log("Invalid region. Please try again.");
     }
+
+    return false; // Return false to indicate that the user did not enter "x"
   }
 
-  /**
-   * TODO: Add method description
-   */
+  public async start(): Promise<void> {
+    this.printHeader();
+
+    let exit: boolean = false;
+    do {
+      exit = await this.selectRegion(); // Check if the user entered "x"
+
+      if (!exit) {
+        // Proceed with the menu only if the user didn't enter "x"
+        let option: string;
+        do {
+          this.print("Menu", menuOptions);
+          option = await this.getInput();
+
+          if (option === "x") {
+            exit = true; // Set exit to true if the user entered "x" during menu selection
+          } else {
+            await this.executeOption(option);
+          }
+        } while (option !== "x" && !exit); // Exit the loop if the user enters "x" or if exit is true
+      }
+    } while (!exit); // Continue the loop until exit is true
+
+    this._rl.close();
+  }
+
   private async executeOption(option: string): Promise<void> {
-    const options = this.getMenuOptions();
+    const options: { [key: string]: () => void } = this.getMenuOptions();
     const selectedOption = options[option];
     if (selectedOption) {
       console.log(
@@ -103,50 +124,20 @@ export class Menu {
     }
   }
 
-  /**
-   * TODO: Add method description
-   */
-  public async start() {
-    this.printHeader();
-
-    let option: string;
-    do {
-      await this.selectRegion();
-
-      do {
-        this.print("Menu", menuOptions);
-        option = await this.getInput();
-
-        if (option !== "x") {
-          await this.executeOption(option);
-        }
-      } while (option !== "x");
-    } while (option !== "x");
-
-    this.rl.close();
-  }
-
-  /**
-   * TODO: Add method description
-   */
   public getInput(): Promise<string> {
     return new Promise((resolve) => {
-      this.rl.question("Enter your option: ", (answer) => {
+      this._rl.question("Enter your option: ", (answer: any) => {
         resolve(answer.trim().toLowerCase());
       });
     });
   }
 
-  /**
-   * TODO: Add method description
-   */
-  public printAllStackNamesOnTXTFile() {
+  public printAllStackNamesOnTXTFile(): void {
     try {
       console.log("Start..");
       console.log("Check for AWS Stack names..");
 
-      this.awsAccount.getStackNamesFromStackList();
-      const stackNames = this.awsAccount.getStackNameList();
+      const stackNames = this._awsAccount.getStackNameList();
       console.log(stackNames);
       const printer = new Printer(stackNames);
       printer.printData();
@@ -157,15 +148,12 @@ export class Menu {
     }
   }
 
-  /**
-   * TODO: Add method description
-   */
-  public logAllStackNames() {
+  public logAllStackNames(): void {
     try {
       console.log("Start..");
       console.log("Check for AWS Stack names..");
 
-      const stackNames = this.awsAccount.getStackNameList();
+      const stackNames = this._awsAccount.getStackNameList();
       console.log("START =============================================");
       console.log(stackNames);
       console.log("=============================================== END");
@@ -174,32 +162,26 @@ export class Menu {
     }
   }
 
-  /**
-   * TODO: Add method description
-   */
-  public async checkAllStacks() {
+  public checkAllStacks(): void {
     try {
       console.log("Start..");
       console.log("Check if all stack are in sync..");
-      if (this.awsAccount.checkAllStacks()) {
+      if (this._awsAccount.checkAllStacks()) {
         console.log("Stack are checked.");
       } else {
-        this.awsAccount.checkAllStacks();
+        this._awsAccount.checkAllStacks();
       }
     } catch (error: unknown) {
       console.error("Error during the execution:", error);
     }
   }
 
-  /**
-   * TODO: Add method description
-   */
-  public async logAllDriftedStack() {
+  public logAllDriftedStack(): void {
     try {
       console.log("Start..");
       console.log("Check if all stack are in sync..");
 
-      const stackNames = this.awsAccount.getAllDriftedStack();
+      const stackNames = this._awsAccount.getAllDriftedStack();
       console.log("START =============================================");
       console.log(stackNames);
       console.log("=============================================== END");
@@ -208,16 +190,13 @@ export class Menu {
     }
   }
 
-  /**
-   * TODO: Add method description
-   */
-  public printAllDriftedStackOnTXTFile() {
+  public printAllDriftedStackOnTXTFile(): void {
     try {
       console.log("Start..");
       console.log("Check for AWS Stack names..");
 
-      this.awsAccount.getStackNamesFromStackList();
-      const stackNames = this.awsAccount.getAllDriftedStack();
+      this._awsAccount.getStackNamesFromStackList();
+      const stackNames = this._awsAccount.getAllDriftedStack();
       console.log(stackNames);
       const printer = new Printer(stackNames);
       printer.printData();
@@ -228,12 +207,12 @@ export class Menu {
     }
   }
 
-  public getAllStatusStack() {
+  public getAllStatusStack(): void {
     try {
       console.log("Start..");
       console.log("Check if all stack are in sync..");
 
-      const stackNames = this.awsAccount.getAllStackWithStatus();
+      const stackNames = this._awsAccount.getAllStackWithStatus();
       console.log("START =============================================");
       console.log(stackNames);
       console.log("=============================================== END");
