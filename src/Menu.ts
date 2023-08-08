@@ -136,46 +136,92 @@ export class Menu implements IMenu {
   }
 
   public printAllStackNamesOnTXTFile(): void {
-    const stackNames = this._awsAccount.getStackNameList();
-    this._printer.writeToFile(stackNames);
+    try {
+      const stackNames = this._awsAccount.getStackNameList();
+      this._printer.writeToFile(stackNames);
+    } catch (error: unknown) {
+      console.error("Error: ", error);
+    }
   }
 
   public async logAllStackNames() {
-    const stackNames = this._awsAccount.getStackNameList();
-    this._printer.printToConsole(stackNames);
+    try {
+      const stackNames = this._awsAccount.getStackNameList();
+      this._printer.printToConsole(stackNames);
+    } catch (error: unknown) {
+      console.error("Error:", error);
+    }
   }
 
   public checkAllStacks(): void {
     try {
       console.log("Start..");
       console.log("Check if all stack are in sync..");
-      if (this._awsAccount.checkAllStacks()) {
-        console.log("Stack are checked.");
+      if (this._awsAccount.getCheckedStatus()) {
+        this._printer.printToConsole("All stack are checked");
+        //console.log("Stack are checked.");
       } else {
         this._awsAccount.checkAllStacks();
+        this._printer.printToConsole("All stack have been checked");
       }
     } catch (error: unknown) {
-      console.error("Error during the execution:", error);
+      console.error("Error during the execution:" + error);
     }
   }
 
   public logAllDriftedStack(): void {
-    const stackNames = this._awsAccount.getAllDriftedStack();
-    this._printer.printToConsole(stackNames);
+    try {
+      const stackNames: string = this._awsAccount.getDriftedStacks();
+      if (!stackNames) {
+        this._awsAccount.getAllDriftedStack();
+        this.logAllDriftedStack();
+      }
+
+      if (stackNames) this._printer.printToConsole(stackNames);
+    } catch (error: unknown) {
+      console.error(error);
+    }
   }
 
   public printAllDriftedStackOnTXTFile(): void {
-    const stackNames = this._awsAccount.getAllDriftedStack();
-    this._printer.writeToFile(stackNames);
+    try {
+      const stackNames: string = this._awsAccount.getDriftedStacks();
+      if (!stackNames) {
+        this._awsAccount.getAllDriftedStack();
+        this.printAllDriftedStackOnTXTFile();
+      }
+
+      if (stackNames) this._printer.writeToFile(stackNames);
+    } catch (error: unknown) {
+      console.error(error);
+    }
   }
 
   public getAllStatusStack(): void {
-    const stackNames = this._awsAccount.getAllStackWithStatus();
-    this._printer.printToConsole(stackNames);
+    try {
+      const stackWithStatus: string = this._awsAccount.getAllStack();
+      if (!stackWithStatus) {
+        this._awsAccount.getAllStackWithStatus();
+        this.getAllStatusStack();
+      }
+
+      if (stackWithStatus) this._printer.printToConsole(stackWithStatus);
+    } catch (error: unknown) {
+      console.error(error);
+    }
   }
 
   public printAllStackWithStatusOnTXTFile(): void {
-    const stackNames = this._awsAccount.getAllStackWithStatus();
-    this._printer.writeToFile(stackNames);
+    try {
+      const stackWithStatus: string = this._awsAccount.getAllStack();
+      if (!stackWithStatus) {
+        this._awsAccount.getAllStackWithStatus();
+        this.printAllStackWithStatusOnTXTFile();
+      }
+
+      if (stackWithStatus) this._printer.writeToFile(stackWithStatus);
+    } catch (error: unknown) {
+      console.error(error);
+    }
   }
 }
