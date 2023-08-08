@@ -19,7 +19,7 @@ export interface IAWSAccount {
    * and sets the '_isStacksChecked' flag to true once all stacks are checked.
    * @returns {boolean} Returns true if all stacks are checked for drift successfully, otherwise false.
    */
-  checkAllStacks: () => boolean;
+  checkAllStacks: () => void;
 
   /**
    * Gets all AWS stacks with drift status as "DRIFTED".
@@ -27,7 +27,7 @@ export interface IAWSAccount {
    * then returns the drifted stacks by calling the 'getAllDriftedStacks' method of the 'AWSNetworkOperator'.
    * @returns {string} The names of AWS stacks with drift status as "DRIFTED", or "All stacks are in sync" if there are no drifted stacks.
    */
-  getAllDriftedStack: () => string;
+  getAllDriftedStack: () => void;
 
   /**
    * Gets the status of all AWS stacks.
@@ -35,7 +35,7 @@ export interface IAWSAccount {
    * then returns the status of all stacks by calling the 'getAllStackWithStatus' method of the 'AWSNetworkOperator'.
    * @returns {string} The status of all AWS stacks.
    */
-  getAllStackWithStatus: () => string;
+  getAllStackWithStatus: () => void;
 
   /**
    * Retrieves AWS stack names from the stack list and stores them in the '_stackNamesList' property.
