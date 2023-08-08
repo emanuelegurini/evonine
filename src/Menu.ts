@@ -8,9 +8,11 @@ import { menuOptions, awsRegionMap } from "./data";
 export class Menu implements IMenu {
   private _rl;
   private _awsAccount: AWSAccount;
+  private _printer!: Printer;
 
   constructor() {
     this._awsAccount = new AWSAccount();
+    this._printer = new Printer();
     this._rl = readline.createInterface({
       input: process.stdin,
       output: process.stdout,
@@ -25,6 +27,7 @@ export class Menu implements IMenu {
       "4": () => this.getAllStatusStack(),
       "5": () => this.printAllStackNamesOnTXTFile(),
       "6": () => this.printAllDriftedStackOnTXTFile(),
+      "7": () => this.printAllStackWithStatusOnTXTFile(),
     };
   }
 
@@ -133,33 +136,13 @@ export class Menu implements IMenu {
   }
 
   public printAllStackNamesOnTXTFile(): void {
-    try {
-      console.log("Start..");
-      console.log("Check for AWS Stack names..");
-
-      const stackNames = this._awsAccount.getStackNameList();
-      console.log(stackNames);
-      const printer = new Printer(stackNames);
-      printer.printData();
-      console.log("Stack names saved on .txt file.");
-      console.log("Check in your directory.");
-    } catch (error) {
-      console.error("Error during the execution:", error);
-    }
+    const stackNames = this._awsAccount.getStackNameList();
+    this._printer.writeToFile(stackNames);
   }
 
-  public logAllStackNames(): void {
-    try {
-      console.log("Start..");
-      console.log("Check for AWS Stack names..");
-
-      const stackNames = this._awsAccount.getStackNameList();
-      console.log("START =============================================");
-      console.log(stackNames);
-      console.log("=============================================== END");
-    } catch (error: unknown) {
-      console.error("Error during the execution:", error);
-    }
+  public async logAllStackNames() {
+    const stackNames = this._awsAccount.getStackNameList();
+    this._printer.printToConsole(stackNames);
   }
 
   public checkAllStacks(): void {
@@ -177,47 +160,22 @@ export class Menu implements IMenu {
   }
 
   public logAllDriftedStack(): void {
-    try {
-      console.log("Start..");
-      console.log("Check if all stack are in sync..");
-
-      const stackNames = this._awsAccount.getAllDriftedStack();
-      console.log("START =============================================");
-      console.log(stackNames);
-      console.log("=============================================== END");
-    } catch (error: unknown) {
-      console.error("Error during the execution:", error);
-    }
+    const stackNames = this._awsAccount.getAllDriftedStack();
+    this._printer.printToConsole(stackNames);
   }
 
   public printAllDriftedStackOnTXTFile(): void {
-    try {
-      console.log("Start..");
-      console.log("Check for AWS Stack names..");
-
-      this._awsAccount.getStackNamesFromStackList();
-      const stackNames = this._awsAccount.getAllDriftedStack();
-      console.log(stackNames);
-      const printer = new Printer(stackNames);
-      printer.printData();
-      console.log("Stack names saved on .txt file.");
-      console.log("Check in your directory.");
-    } catch (error: unknown) {
-      console.error("Error during the execution:", error);
-    }
+    const stackNames = this._awsAccount.getAllDriftedStack();
+    this._printer.writeToFile(stackNames);
   }
 
   public getAllStatusStack(): void {
-    try {
-      console.log("Start..");
-      console.log("Check if all stack are in sync..");
+    const stackNames = this._awsAccount.getAllStackWithStatus();
+    this._printer.printToConsole(stackNames);
+  }
 
-      const stackNames = this._awsAccount.getAllStackWithStatus();
-      console.log("START =============================================");
-      console.log(stackNames);
-      console.log("=============================================== END");
-    } catch (error: unknown) {
-      console.error("Error during the execution:", error);
-    }
+  public printAllStackWithStatusOnTXTFile(): void {
+    const stackNames = this._awsAccount.getAllStackWithStatus();
+    this._printer.writeToFile(stackNames);
   }
 }

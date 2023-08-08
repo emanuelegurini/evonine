@@ -74,4 +74,9 @@ export interface IMenu {
    * @returns {void}
    */
   getAllStatusStack: () => void;
+
+  /**
+   *
+   */
+  printAllStackWithStatusOnTXTFile: () => void;
 }

@@ -49,4 +49,5 @@ export const menuOptions: { [key: string]: string } = {
   "4": "Log table with all stack status",
   "5": "Print all stack names in a TXT file",
   "6": "Print all drifted stack in a TXT file",
+  "7": "Print all stack with status in a TXT file",
 };

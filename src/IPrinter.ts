@@ -7,7 +7,12 @@ export interface IPrinter {
    *
    * @returns {void}
    */
-  printData: () => void;
+  printToConsole: (data: string | Array<string>) => void;
+
+  /**
+   *
+   */
+  writeToFile: (data: string | Array<string>) => void;
 
   /**
    * Generates a formatted filename based on the current date and time.
