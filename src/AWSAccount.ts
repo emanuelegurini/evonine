@@ -11,7 +11,11 @@ export class AWSAccount implements IAWSAccount {
 
   private _awsNetworkOperator: AWSNetworkOperator;
 
-  _isStacksChecked: boolean;
+  private _isStacksChecked: boolean;
+
+  private _driftedStacks!: string;
+
+  private _allStackWithStatus!: string;
 
   constructor() {
     this._region = "";
@@ -28,55 +32,76 @@ export class AWSAccount implements IAWSAccount {
     this._region = region;
   }
 
-  public checkAllStacks(): boolean {
+  public getCheckedStatus() {
+    return this._isStacksChecked;
+  }
+
+  public checkAllStacks(): void {
     try {
-      if (this._isStacksChecked) {
-        return true;
-      }
       if (!this._stackNamesList) {
         this.getStackNamesFromStackList();
       }
 
       if (this._stackNamesList && this._stackNamesList.length > 0) {
-        for (let i = 0; i < this._stackNamesList.length; i++) {
-          const stackName = this._stackNamesList[i];
-          const region = this._region;
-          let index = i + 1;
-          console.log(
-            `[Stack ${index} / ${this._stackNamesList.length}] - ${stackName}`
-          );
-
-          this._awsNetworkOperator.detectStackDrift(stackName, region);
-        }
+        this.processStacks(this._stackNamesList);
       }
+
       this._isStacksChecked = true;
-      return this._isStacksChecked;
     } catch (error: unknown) {
-      console.error("An error occurred while checking the stacks:", error);
-      return this._isStacksChecked;
+      throw new Error("An error occurred while checking the stacks:" + error);
     }
   }
 
-  public getAllDriftedStack(): string {
+  private processStacks(stackNames: string[]): void {
+    for (let i: number = 0; i < stackNames.length; i++) {
+      const region = this._region;
+      const stackName = stackNames[i];
+      console.log(`[Stack ${i + 1} / ${stackNames.length}] - ${stackName}`);
+      try {
+        this._awsNetworkOperator.detectStackDrift(stackName, region);
+      } catch (error) {
+        throw new Error(`Error processing stack ${stackName}:` + error);
+      }
+    }
+  }
+
+  public getDriftedStacks(): string {
+    return this._driftedStacks;
+  }
+
+  public getAllDriftedStack(): void {
     try {
       if (!this._isStacksChecked) {
         this.checkAllStacks();
       }
-      return this._awsNetworkOperator.getAllDriftedStacks(this._region);
+
+      this._driftedStacks = this._awsNetworkOperator.getAllDriftedStacks(
+        this._region
+      );
     } catch (error: unknown) {
-      return "All stacks are in sync";
+      this._driftedStacks = "All stacks are in sync";
     }
   }
 
-  public getAllStackWithStatus(): string {
-    if (!this._isStacksChecked) {
-      this.checkAllStacks();
-    }
-
-    return this._awsNetworkOperator.getAllStackWithStatus(this._region);
+  public getAllStack(): string {
+    return this._allStackWithStatus;
   }
 
-  public getStackNamesFromStackList(): boolean {
+  public getAllStackWithStatus(): void {
+    try {
+      if (!this._isStacksChecked) {
+        this.checkAllStacks();
+      }
+
+      this._allStackWithStatus = this._awsNetworkOperator.getAllStackWithStatus(
+        this._region
+      );
+    } catch (error: unknown) {
+      throw new Error("");
+    }
+  }
+
+  public getStackNamesFromStackList(): any {
     try {
       const stackNames: string = this._awsNetworkOperator.fetchStackList(
         this._region
@@ -87,16 +112,17 @@ export class AWSAccount implements IAWSAccount {
         .slice(3)
         .map((row) => row.split(/\s+/)[1])
         .filter((item) => item !== undefined && item.trim() !== "");
-      return true;
     } catch (error: unknown) {
-      console.error("An error occurred while retrieving the stacks:", error);
-      return false;
+      throw new Error("An error occurred while retrieving the stacks:" + error);
     }
   }
 
   public getStackNameList(): Array<string> {
-    if (!this._stackNamesList) this.getStackNamesFromStackList();
-
-    return this._stackNamesList;
+    try {
+      if (!this._stackNamesList) this.getStackNamesFromStackList();
+      return this._stackNamesList;
+    } catch (error: unknown) {
+      throw new Error("Error: " + error);
+    }
   }
 }
