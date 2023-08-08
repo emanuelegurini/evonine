@@ -9,13 +9,13 @@ export class Printer implements IPrinter {
 
   public printToConsole(data: string | Array<string>): void {
     if (data === null) {
-      throw new Error("Data should not be null!");
+      console.error("Data should not be null!");
     }
 
-    if (typeof data === "string") {
-      console.log(data);
-    } else {
-      try {
+    try {
+      if (typeof data === "string") {
+        console.log(data);
+      } else {
         console.log("Start..");
         console.log("Check for AWS Stack names..");
 
@@ -26,34 +26,40 @@ export class Printer implements IPrinter {
           console.log(`[Stack ${index} / ${data.length}] - ${stackName}`);
         }
         console.log("=============================================== END");
-      } catch (error: unknown) {
-        console.error("Error during the execution:", error);
       }
+    } catch (error: unknown) {
+      throw new Error("Error during the execution: " + error);
     }
   }
 
   public writeToFile(data: string | Array<string>): void {
     if (data === null) {
-      throw new Error("Data should not be null!");
+      console.error("Data should not be null!");
     }
 
     const fileName = this.getFileName();
 
     let content = "";
 
-    if (typeof data === "string") {
-      content = data;
-    } else {
-      content = data
-        .map((line, index) => `[Stack ${index + 1} / ${data.length}] - ${line}`)
-        .join("\n");
+    try {
+      if (typeof data === "string") {
+        content = data;
+      } else {
+        content = data
+          .map(
+            (line, index) => `[Stack ${index + 1} / ${data.length}] - ${line}`
+          )
+          .join("\n");
+      }
+
+      fs.writeFileSync(this._path + fileName, content, {
+        encoding: "utf-8",
+      });
+
+      console.log(`Saved in ${fileName}`);
+    } catch (error: unknown) {
+      throw new Error("Error" + error);
     }
-
-    fs.writeFileSync(this._path + fileName, content, {
-      encoding: "utf-8",
-    });
-
-    console.log(`Saved in ${fileName}`);
   }
 
   public getFileName(): string {
