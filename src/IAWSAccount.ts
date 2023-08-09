@@ -1,53 +1,66 @@
+/**
+ * Represents the interface for AWS account operations.
+ */
 export interface IAWSAccount {
   /**
-   * Gets the currently set AWS region for the AWSAccount instance.
-   * @returns {string} The currently set AWS region.
+   * Get the current AWS region.
+   *
+   * @returns The AWS region.
    */
-  getRegion: () => string;
+  getRegion(): string;
 
   /**
-   * Sets the AWS region for the AWSAccount instance.
-   * @param {string} region - The AWS region to set.
-   * @returns {void}
-   * @throws {Error} Throws an error if the provided region is null.
+   * Set the AWS region.
+   *
+   * @param region - The AWS region to set.
    */
-  setRegion: (region: string) => void;
+  setRegion(region: string): void;
 
   /**
-   * Checks all AWS stacks for drift.
-   * This method iterates through all the stack names, detects drift for each stack,
-   * and sets the '_isStacksChecked' flag to true once all stacks are checked.
-   * @returns {boolean} Returns true if all stacks are checked for drift successfully, otherwise false.
+   * Checks if all the stacks have been verified.
+   *
+   * @returns `true` if stacks are verified, otherwise `false`.
    */
-  checkAllStacks: () => void;
+  stackVerified(): boolean;
 
   /**
-   * Gets all AWS stacks with drift status as "DRIFTED".
-   * This method calls the 'checkAllStacks' method if the stacks are not already checked,
-   * then returns the drifted stacks by calling the 'getAllDriftedStacks' method of the 'AWSNetworkOperator'.
-   * @returns {string} The names of AWS stacks with drift status as "DRIFTED", or "All stacks are in sync" if there are no drifted stacks.
+   * Verifies all the CloudFormation stacks.
    */
-  getAllDriftedStack: () => void;
+  verifyAllStacks(): void;
 
   /**
-   * Gets the status of all AWS stacks.
-   * This method calls the 'checkAllStacks' method if the stacks are not already checked,
-   * then returns the status of all stacks by calling the 'getAllStackWithStatus' method of the 'AWSNetworkOperator'.
-   * @returns {string} The status of all AWS stacks.
+   * Fetches the list of all drifted CloudFormation stacks.
+   *
+   * @returns List of drifted stacks as a string.
    */
-  getAllStackWithStatus: () => void;
+  getDriftedStacks(): string;
 
   /**
-   * Retrieves AWS stack names from the stack list and stores them in the '_stackNamesList' property.
-   * This method calls the 'fetchStackList' method of the 'AWSNetworkOperator' to get the stack names.
-   * @returns {boolean} Returns true if stack names are retrieved successfully, otherwise false.
+   * Load and update the drifted CloudFormation stacks.
    */
-  getStackNamesFromStackList: () => boolean;
+  loadDriftedStack(): void;
 
   /**
-   * Gets the list of AWS stack names.
-   * If the '_stackNamesList' property is empty, it calls the 'getStackNamesFromStackList' method to fetch the stack names first.
-   * @returns {Array<string>} An array of AWS stack names.
+   * Fetches the status of all CloudFormation stacks.
+   *
+   * @returns Status of all stacks as a string.
    */
-  getStackNameList: () => Array<string>;
+  getAllStackStatus(): string;
+
+  /**
+   * Load and update the status of all CloudFormation stacks.
+   */
+  loadAllStackWithStatus(): void;
+
+  /**
+   * Load all the CloudFormation stack names.
+   */
+  loadStackNames(): void;
+
+  /**
+   * Get all the CloudFormation stack names.
+   *
+   * @returns An array of CloudFormation stack names.
+   */
+  getStackNames(): Array<string>;
 }

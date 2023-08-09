@@ -1,15 +1,14 @@
 import { IPrinter } from "./IPrinter";
-
-const fs = require("fs");
+import * as fs from "fs";
 
 export class Printer implements IPrinter {
   private _path: string = "../output/";
 
   constructor() {}
 
-  public printToConsole(data: string | Array<string>): void {
-    if (data === null) {
-      console.error("Data should not be null!");
+  public displayToConsole(data: string | Array<string>): void {
+    if (!data) {
+      console.error("Data should not be null or undefined!");
     }
 
     try {
@@ -28,16 +27,16 @@ export class Printer implements IPrinter {
         console.log("=============================================== END");
       }
     } catch (error: unknown) {
-      throw new Error("Error during the execution: " + error);
+      throw new Error(`Error during data display: ${error}`);
     }
   }
 
-  public writeToFile(data: string | Array<string>): void {
-    if (data === null) {
+  public saveToFile(data: string | Array<string>): void {
+    if (!data) {
       console.error("Data should not be null!");
     }
 
-    const fileName = this.getFileName();
+    const fileName = this.generateFileName();
 
     let content = "";
 
@@ -56,13 +55,13 @@ export class Printer implements IPrinter {
         encoding: "utf-8",
       });
 
-      console.log(`Saved in ${fileName}`);
+      console.log(`Data saved in ${fileName}`);
     } catch (error: unknown) {
-      throw new Error("Error" + error);
+      throw new Error(`Error saving to file: ${error}`);
     }
   }
 
-  public getFileName(): string {
+  public generateFileName(): string {
     const today = new Date();
 
     const dd: string = today.getDate().toString().padStart(2, "0");

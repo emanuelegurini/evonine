@@ -1,82 +1,62 @@
 export interface IMenu {
   /**
-   * Get the menu options for the AWS Account class.
-   * @returns {Object.<string, Function>} An object containing menu options as keys and corresponding functions as values.
+   * Returns an object mapping menu options to their respective functions.
+   * @returns An object where each key is an option number and the corresponding value is the function to execute.
    */
-  getMenuOptions: () => void;
+  getMenuOptions(): { [key: string]: () => void };
 
   /**
-   * Print a menu with header and options to the console.
-   * @param {string} header - The header text to display at the top of the menu.
-   * @param {Object.<number, string>} options - An object containing menu options as keys and their descriptions as values.
-   * @returns {void}
+   * Prints the provided header and options to the console.
+   * @param header - The main header/title for the options.
+   * @param options - An object containing the list of options to print.
    */
-  print: (header: string, options: { [key: number]: string }) => void;
+  print(header: string, options: { [key: number]: string }): void;
 
   /**
-   * Start the AWS Account drift detector.
-   * This method displays the header, allows the user to select a region,
-   * and presents a menu of options to perform various actions related to stack drift detection.
-   * The user can choose menu options until they choose to exit ('x').
-   * @returns {Promise<void>} A Promise that resolves when the drift detector is started and the user exits.
+   * Starts the menu flow, including selecting a region and displaying available options.
+   * @returns A promise that resolves when the process is complete.
    */
-  start: () => Promise<void>;
+  start(): Promise<void>;
 
   /**
-   * Get user input from the console.
-   * @returns {Promise<string>} A Promise that resolves with the user's input as a string (trimmed and converted to lowercase).
+   * Prompts the user for input.
+   * @returns A promise that resolves with the user's input.
    */
-  getInput: () => Promise<string>;
+  getInput(): Promise<string>;
 
   /**
-   * Print all AWS Stack names on a .txt file.
-   * This method fetches the AWS Stack names, creates a Printer instance to print the data,
-   * and saves the Stack names to a .txt file in the current directory.
-   * @returns {void}
+   * Exports all AWS stack names to a text file.
    */
-  printAllStackNamesOnTXTFile: () => void;
+  exportAllStackNamesToTXT(): void;
 
   /**
-   * Log all AWS Stack names to the console.
-   * This method fetches the AWS Stack names and logs them to the console.
-   * @returns {void}
+   * Displays all AWS stack names in the console.
+   * @returns A promise that resolves when the display process is complete.
    */
-  logAllStackNames: () => void;
+  displayAllStackNames(): Promise<void>;
 
   /**
-   * Check if all AWS stacks are in sync.
-   * This method checks if all AWS stacks are in sync by calling the `checkAllStacks()` method of the AWSAccount class.
-   * If the stacks are checked successfully, it logs a message indicating that the stacks are checked.
-   * @returns {void}
+   * Validates all AWS stacks.
    */
-  checkAllStacks: () => void;
+  validateAllStacks(): void;
 
   /**
-   * Log all AWS stacks with drift status as "DRIFTED" to the console.
-   * This method checks for all AWS stacks with drift status as "DRIFTED" by calling the `getAllDriftedStack()` method of the AWSAccount class.
-   * The names of the drifted stacks are logged to the console.
-   * @returns {void}
+   * Displays the names of all drifted AWS stacks in the console.
    */
-  logAllDriftedStack: () => void;
+  displayAllDriftedStacks(): void;
 
   /**
-   * Print names of all AWS stacks with drift status as "DRIFTED" on a .txt file.
-   * This method fetches the AWS stack names and filters those with drift status as "DRIFTED" by calling the `getAllDriftedStack()` method of the AWSAccount class.
-   * The names of the drifted stacks are then printed to a .txt file in the current directory using the Printer class.
-   * @returns {void}
+   * Exports the names of all drifted AWS stacks to a text file.
    */
-  printAllDriftedStackOnTXTFile: () => void;
+  exportDriftedStacksToTXT(): void;
 
   /**
-   * Get the status of all AWS stacks.
-   * This method fetches the status of all AWS stacks by calling the `getAllStackWithStatus()` method of the AWSAccount class.
-   * The stack information, including status, is logged to the console.
-   * @returns {void}
+   * Displays the status of all AWS stacks in the console.
    */
-  getAllStatusStack: () => void;
+  showAllStackStatus(): void;
 
   /**
-   *
+   * Exports the status of all AWS stacks to a text file.
    */
-  printAllStackWithStatusOnTXTFile: () => void;
+  exportStackStatusToTXT(): void;
 }

@@ -1,5 +1,4 @@
-const readline = require("readline");
-
+import * as readline from "readline";
 import { AWSAccount } from "./AWSAccount";
 import { IMenu } from "./IMenu";
 import { Printer } from "./Printer";
@@ -21,13 +20,13 @@ export class Menu implements IMenu {
 
   public getMenuOptions() {
     return {
-      "1": () => this.logAllStackNames(),
-      "2": () => this.checkAllStacks(),
-      "3": () => this.logAllDriftedStack(),
-      "4": () => this.getAllStatusStack(),
-      "5": () => this.printAllStackNamesOnTXTFile(),
-      "6": () => this.printAllDriftedStackOnTXTFile(),
-      "7": () => this.printAllStackWithStatusOnTXTFile(),
+      "1": () => this.displayAllStackNames(),
+      "2": () => this.validateAllStacks(),
+      "3": () => this.displayAllDriftedStacks(),
+      "4": () => this.showAllStackStatus(),
+      "5": () => this.exportAllStackNamesToTXT(),
+      "6": () => this.exportDriftedStacksToTXT(),
+      "7": () => this.exportStackStatusToTXT(),
     };
   }
 
@@ -135,91 +134,91 @@ export class Menu implements IMenu {
     });
   }
 
-  public printAllStackNamesOnTXTFile(): void {
+  public exportAllStackNamesToTXT(): void {
     try {
-      const stackNames = this._awsAccount.getStackNameList();
-      this._printer.writeToFile(stackNames);
+      const stackNames = this._awsAccount.getStackNames();
+      this._printer.saveToFile(stackNames);
     } catch (error: unknown) {
       console.error("Error: ", error);
     }
   }
 
-  public async logAllStackNames() {
+  public async displayAllStackNames() {
     try {
-      const stackNames = this._awsAccount.getStackNameList();
-      this._printer.printToConsole(stackNames);
+      const stackNames = this._awsAccount.getStackNames();
+      this._printer.displayToConsole(stackNames);
     } catch (error: unknown) {
       console.error("Error:", error);
     }
   }
 
-  public checkAllStacks(): void {
+  public validateAllStacks(): void {
     try {
       console.log("Start..");
       console.log("Check if all stack are in sync..");
-      if (this._awsAccount.getCheckedStatus()) {
-        this._printer.printToConsole("All stack are checked");
-        //console.log("Stack are checked.");
+      if (this._awsAccount.stackVerified()) {
+        this._printer.displayToConsole("All stack are checked");
       } else {
-        this._awsAccount.checkAllStacks();
-        this._printer.printToConsole("All stack have been checked");
+        this._awsAccount.verifyAllStacks();
+        this._printer.displayToConsole("All stack have been checked");
       }
     } catch (error: unknown) {
       console.error("Error during the execution:" + error);
     }
   }
 
-  public logAllDriftedStack(): void {
+  public displayAllDriftedStacks(): void {
+    try {
+      const stackNames: string = this._awsAccount.getDriftedStacks();
+
+      if (!stackNames) {
+        this._awsAccount.loadDriftedStack();
+        this.displayAllDriftedStacks();
+      }
+
+      if (stackNames) this._printer.displayToConsole(stackNames);
+    } catch (error: unknown) {
+      console.error(error);
+    }
+  }
+
+  public exportDriftedStacksToTXT(): void {
     try {
       const stackNames: string = this._awsAccount.getDriftedStacks();
       if (!stackNames) {
-        this._awsAccount.getAllDriftedStack();
-        this.logAllDriftedStack();
+        this._awsAccount.loadDriftedStack();
+        this.exportDriftedStacksToTXT();
       }
 
-      if (stackNames) this._printer.printToConsole(stackNames);
+      if (stackNames) this._printer.saveToFile(stackNames);
     } catch (error: unknown) {
       console.error(error);
     }
   }
 
-  public printAllDriftedStackOnTXTFile(): void {
+  public showAllStackStatus(): void {
     try {
-      const stackNames: string = this._awsAccount.getDriftedStacks();
-      if (!stackNames) {
-        this._awsAccount.getAllDriftedStack();
-        this.printAllDriftedStackOnTXTFile();
-      }
-
-      if (stackNames) this._printer.writeToFile(stackNames);
-    } catch (error: unknown) {
-      console.error(error);
-    }
-  }
-
-  public getAllStatusStack(): void {
-    try {
-      const stackWithStatus: string = this._awsAccount.getAllStack();
+      const stackWithStatus: string = this._awsAccount.getAllStackStatus();
       if (!stackWithStatus) {
-        this._awsAccount.getAllStackWithStatus();
-        this.getAllStatusStack();
+        this._awsAccount.loadAllStackWithStatus();
+        this.showAllStackStatus();
       }
 
-      if (stackWithStatus) this._printer.printToConsole(stackWithStatus);
+      if (stackWithStatus) this._printer.displayToConsole(stackWithStatus);
     } catch (error: unknown) {
       console.error(error);
     }
   }
 
-  public printAllStackWithStatusOnTXTFile(): void {
+  public exportStackStatusToTXT(): void {
     try {
-      const stackWithStatus: string = this._awsAccount.getAllStack();
+      const stackWithStatus: string = this._awsAccount.getAllStackStatus();
       if (!stackWithStatus) {
-        this._awsAccount.getAllStackWithStatus();
-        this.printAllStackWithStatusOnTXTFile();
+        this._awsAccount.loadAllStackWithStatus();
+        this.exportStackStatusToTXT();
       }
 
-      if (stackWithStatus) this._printer.writeToFile(stackWithStatus);
+      if (stackWithStatus) this._printer.saveToFile(stackWithStatus);
     } catch (error: unknown) {
       console.error(error);
     }

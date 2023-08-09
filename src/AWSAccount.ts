@@ -1,4 +1,3 @@
-const { execSync } = require("child_process");
 import { AWSNetworkOperator } from "./AWSNetworkOperator";
 import { IAWSAccount } from "./IAWSAccount";
 
@@ -11,16 +10,16 @@ export class AWSAccount implements IAWSAccount {
 
   private _awsNetworkOperator: AWSNetworkOperator;
 
-  private _isStacksChecked: boolean;
+  private _stacksVerified: boolean;
 
   private _driftedStacks!: string;
 
-  private _allStackWithStatus!: string;
+  private _stackWithStatus!: string;
 
   constructor() {
     this._region = "";
     this._awsNetworkOperator = new AWSNetworkOperator();
-    this._isStacksChecked = false;
+    this._stacksVerified = false;
   }
 
   public getRegion(): string {
@@ -28,27 +27,27 @@ export class AWSAccount implements IAWSAccount {
   }
 
   public setRegion(region: string): void {
-    if (region === null) throw new Error("Regions should not be null");
+    if (!region) throw new Error("Regions should not be null");
     this._region = region;
   }
 
-  public getCheckedStatus() {
-    return this._isStacksChecked;
+  public stackVerified(): boolean {
+    return this._stacksVerified;
   }
 
-  public checkAllStacks(): void {
+  public verifyAllStacks(): void {
     try {
       if (!this._stackNamesList) {
-        this.getStackNamesFromStackList();
+        this.loadStackNames();
       }
 
       if (this._stackNamesList && this._stackNamesList.length > 0) {
         this.processStacks(this._stackNamesList);
       }
 
-      this._isStacksChecked = true;
+      this._stacksVerified = true;
     } catch (error: unknown) {
-      throw new Error("An error occurred while checking the stacks:" + error);
+      throw new Error("Error while verifying the stacks: " + error);
     }
   }
 
@@ -69,13 +68,13 @@ export class AWSAccount implements IAWSAccount {
     return this._driftedStacks;
   }
 
-  public getAllDriftedStack(): void {
+  public loadDriftedStack(): void {
     try {
-      if (!this._isStacksChecked) {
-        this.checkAllStacks();
+      if (!this._stacksVerified) {
+        this.verifyAllStacks();
       }
 
-      this._driftedStacks = this._awsNetworkOperator.getAllDriftedStacks(
+      this._driftedStacks = this._awsNetworkOperator.fetchAllDriftedStacks(
         this._region
       );
     } catch (error: unknown) {
@@ -83,25 +82,25 @@ export class AWSAccount implements IAWSAccount {
     }
   }
 
-  public getAllStack(): string {
-    return this._allStackWithStatus;
+  public getAllStackStatus(): string {
+    return this._stackWithStatus;
   }
 
-  public getAllStackWithStatus(): void {
+  public loadAllStackWithStatus(): void {
     try {
-      if (!this._isStacksChecked) {
-        this.checkAllStacks();
+      if (!this._stacksVerified) {
+        this.verifyAllStacks();
       }
 
-      this._allStackWithStatus = this._awsNetworkOperator.getAllStackWithStatus(
+      this._stackWithStatus = this._awsNetworkOperator.fetchAllStackStatus(
         this._region
       );
     } catch (error: unknown) {
-      throw new Error("");
+      throw new Error("Error while fetching all stack statuses");
     }
   }
 
-  public getStackNamesFromStackList(): any {
+  public loadStackNames(): void {
     try {
       const stackNames: string = this._awsNetworkOperator.fetchStackList(
         this._region
@@ -113,16 +112,16 @@ export class AWSAccount implements IAWSAccount {
         .map((row) => row.split(/\s+/)[1])
         .filter((item) => item !== undefined && item.trim() !== "");
     } catch (error: unknown) {
-      throw new Error("An error occurred while retrieving the stacks:" + error);
+      throw new Error("Error while loading the stack names: " + error);
     }
   }
 
-  public getStackNameList(): Array<string> {
+  public getStackNames(): Array<string> {
     try {
-      if (!this._stackNamesList) this.getStackNamesFromStackList();
+      if (!this._stackNamesList) this.loadStackNames();
       return this._stackNamesList;
     } catch (error: unknown) {
-      throw new Error("Error: " + error);
+      throw new Error("Error while getting stack names: " + error);
     }
   }
 }
